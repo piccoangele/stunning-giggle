@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My running plan</title>
+<style>
+:root{--bg:#fff6ec;--bg2:#ffe6c8;--fg:#3b2a35;--mut:#7a6272;--card:#fffdf9;--ln:#f0dfcc;--ac:#f2a541;--acfg:#3b2a35;--soft:#ffe9cf;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{overflow-anchor:none;scroll-behavior:auto;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--fg);background:var(--bg) linear-gradient(180deg,var(--bg2) 0,var(--bg) 280px) no-repeat;font:16px/1.5 ui-rounded,"SF Pro Rounded","Nunito","Quicksand",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:560px;margin:0 auto;padding:20px 16px 32px}
+.hero{padding:8px 4px 4px}
+h1{font-size:31px;line-height:1.15;margin:0 0 4px;font-weight:800;letter-spacing:-.01em}
+.hero p{margin:0 0 14px;color:var(--mut)}
+#prog{font-size:14px;font-weight:700}
+.bar{height:10px;margin-top:6px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--ac)}
+h2{font-size:21px;margin:22px 0 2px;font-weight:800}
+.m{color:var(--mut);font-size:14px}
+details{background:var(--card);border:1px solid var(--ln);border-radius:18px;padding:14px 16px;margin-top:14px}
+summary{font-weight:800;cursor:pointer}
+label{display:block;margin:14px 0 0;font-size:14px;color:var(--mut);font-weight:600}
+select,input{width:100%;margin-top:5px;padding:11px 12px;font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--ln);border-radius:12px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.chips{display:flex;gap:7px;margin:10px 0;flex-wrap:wrap}
+.wk{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
+.chips button{flex:0 0 auto;min-width:46px;padding:10px 12px;font:inherit;font-weight:700;color:var(--fg);background:var(--card);border:1.5px solid var(--ln);border-radius:99px}
+.chips button.on{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
+.btn{width:100%;margin-top:16px;padding:14px;font:inherit;font-weight:800;color:var(--acfg);background:var(--ac);border:0;border-radius:99px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:18px;padding:14px 16px;margin-top:14px;font-size:15px}
+.wo{background:var(--card);border:1px solid var(--ln);border-left:7px solid var(--t);border-radius:16px;padding:12px 14px;margin-top:10px}
+.wo b{display:block;font-size:17px;font-weight:800}
+.wo.done{background:var(--soft)}.wo.done b::after{content:" \2713";color:var(--t)}
+.rest{color:var(--mut);font-size:14px;padding:9px 6px}
+.easy{--t:#6f9e80}.tempo{--t:#e49a26}.int{--t:#e5705a}.long{--t:#7c86c8}.race{--t:#a8628f}
+.note{margin-top:24px;font-size:13px;color:var(--mut)}
+button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.chips button.past{opacity:.5}.chips button.now{box-shadow:0 0 0 2px var(--ac)}
+.past .wo{opacity:.55}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ctl button{padding:8px 12px;font:inherit;font-size:14px;font-weight:700;color:var(--fg);background:var(--bg);border:1.5px solid var(--ln);border-radius:99px}
+.ctl button.on{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
+.btn.sm{margin-top:10px;padding:10px 14px;font-size:15px}
+.btn.alt{background:var(--soft);color:var(--fg)}
+.rrow{border-top:1px solid var(--ln);padding:10px 0}
+.chips button:disabled{opacity:.35}
+button{cursor:pointer;touch-action:manipulation}button:disabled{cursor:default}
+#setup-msg:empty{display:none}#setup-msg{color:#873a27;margin-top:12px}
+.row>*{min-width:0}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head><body><main>
+<header class="hero"><h1>My running plan</h1><p>Steady, gentle, at your own pace.</p><div class="m" id="today"></div><div id="prog"></div></header>
+<details id="setup" open><summary>Your setup</summary>
+<label>Objective<select id="obj">
+<option value="goal">Work toward a goal time</option>
+<option value="5k">Event: 5K</option><option value="10k">Event: 10K</option><option value="half">Event: half marathon</option><option value="marathon">Event: marathon</option>
+<option value="faster">Get faster</option><option value="base">Build a base</option><option value="return">Return to running</option><option value="consistent">Run consistently</option></select></label>
+<div class="row"><label>Current result: distance<select id="dist"><option value="5">5 km</option><option value="10">10 km</option><option value="21.1">Half marathon</option><option value="42.2">Marathon</option></select></label>
+<label>Time<input id="time" placeholder="40:00 or 1:55:00"></label></div>
+<div class="row"><label>Goal time (goal mode)<input id="tgt" placeholder="30:00"></label>
+<label>Weeks (optional)<input id="wks" type="number" min="4" max="52" inputmode="numeric"></label></div>
+<label>Event date (optional, event modes)<input type="date" id="rd"></label>
+<label>Current running per week (km)<input id="km" type="number" min="0" max="150" inputmode="decimal"></label>
+<label>Start date<input type="date" id="sdt"></label>
+<div class="chips" id="sq"><button type="button" data-sd="0">Today</button><button type="button" data-sd="1">Tomorrow</button><button type="button" data-sd="m">Next Monday</button></div>
+<label>Usual run time (for your calendar)<input type="time" id="rtm" value="07:00"></label>
+<label>Days you can run</label><div id="dys" class="chips"></div>
+<button id="go" class="btn" type="button">Preview my plan</button><div id="setup-msg" role="alert"></div></details>
+<div id="out"></div>
+<p class="note">Missing a run is fine, the plan adjusts. Stop and rest if something hurts. These are guidelines, not medical advice, and your data stays on this device.</p>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const G=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const S=(k,v)=>{if(draft&&k!='runs')return;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){msg='Your browser could not save changes. Keep this page open; changes may be lost on reload.'}};
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const RACE={'5k':5,'10k':10,half:21.1,marathon:42.2},DK={'5':'5k','10':'10k','21.1':'half','42.2':'marathon'};
+const NAME={'5k':'5K','10k':'10K',half:'Half marathon',marathon:'Marathon'};
+const add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const iso=d=>d.toLocaleDateString('sv-SE');
+const fd=d=>d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+const mon=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+(8-d.getDay())%7);return d};
+const nextMon=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+((8-d.getDay())%7||7));return d};
+const mins=t=>{const s=String(t||'').trim();if(!/^\d+(?::[0-5]\d){0,2}$/.test(s))return 0;const p=s.split(':').map(Number),v=p.length==3?p[0]*60+p[1]+p[2]/60:p[0]+(p[1]||0)/60;return Number.isFinite(v)?v:0};
+const dayNumber=s=>{const [y,m,d]=s.split('-').map(Number);return Date.UTC(y,m-1,d)/864e5};
+const validDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(dayNumber(s))&&iso(new Date(s+'T12:00'))===s;
+const vdot=(m,t)=>{const v=m/t;return(-4.6+.182258*v+.000104*v*v)/(.8+.1894393*Math.exp(-.012778*t)+.2989558*Math.exp(-.1932605*t))};
+const pace=(vd,f)=>{const o=f*vd;return 1000/((-.182258+Math.sqrt(.182258**2+4*.000104*(4.6+o)))/(2*.000104))};
+const fp=x=>{let m=Math.floor(x),s=Math.round((x-m)*60);if(s==60){m++;s=0}return m+':'+String(s).padStart(2,'0')};
+const ft=t=>{const s=Math.round(t*60),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s%60).padStart(2,'0')};
+const rate=v=>v<30?.012:v<40?.008:v<50?.005:.003;
+const proj=(v,n)=>{for(let i=0;i<n;i++)v*=1+rate(v);return v};
+const timeFor=(vd,km)=>{let lo=5,hi=700;for(let i=0;i<40;i++){const m=(lo+hi)/2;vdot(km*1000,m)>vd?lo=m:hi=m}return(lo+hi)/2};
+
+let draft=false,chosen=G('chosen',false),pend=0,c,res,rt,done,started,wo={},er=null,dr=null,ro=false,runs=G('runs',[]),cur=null,plan=null,act={},msg='';
+const DEF={obj:'goal',rd:'',dist:'5',time:'',tgt:'',wks:'',km:20,days:[1,3,6],start:'',begin:'',rtm:'07:00'};
+function load(){c={...DEF,...G('cfg',DEF)};res=G('res',[]);done=G('done',{});rt=G('rt',{});started=G('started',[]);wo=G('wo',{})}
+load();let sd=[...c.days];
+const weekOf=d=>Math.floor((dayNumber(d)-dayNumber(c.start))/7);
+const vdAt=w=>{let r=null;for(const x of res)if(x.w<=w&&(!r||x.w>=r.w))r=x;return r?(c.obj=='goal'?proj(r.v,w-r.w):r.v):0};
+
+function build(){
+ const goal=c.obj=='goal',eo=goal?DK[c.dist]:c.obj,race=eo in RACE,st=new Date(c.start+'T12:00');
+ let W={'5k':10,'10k':12,half:14,marathon:18}[eo]||8,rd=null,note='';
+ if(!goal&&+c.wks>0)W=+c.wks;
+ if(race&&!goal&&c.rd){const r=new Date(c.rd+'T12:00'),wk=Math.floor((dayNumber(c.rd)-dayNumber(c.start))/7)+1;if(r>=st&&wk<=52){rd=r;W=wk}}
+ if(goal){
+  const lr=res.reduce((a,x)=>x.w>=a.w?x:a,{w:0,v:0}),vT=vdot(c.dist*1000,mins(c.tgt));let n=0,v=lr.v;
+  while(v<vT&&n<52){v*=1+rate(v);n++}
+  const need=Math.max(6,lr.w+n);W=Math.max(lr.w+1,started.length?Math.max(...started)+1:1,+c.wks>0?+c.wks:need);
+  note=+c.wks>0?`In ${W} weeks, this simplified projection suggests about ${ft(timeFor(proj(lr.v,W-lr.w),c.dist))}. The same projection suggests about ${need} weeks.`
+   :`Rough projection: ${need} weeks. This is a planning estimate, not a prediction of fitness gains. Recent results update your paces and timeline.`;
+  if(n>=52)note+=' That is over a year: consider an intermediate goal first.';
+ }
+ const T=race?(eo=='5k'||eo=='10k'?1:2):0,B=W-T;
+ let s0=+c.km;if(eo=='return')s0=Math.min(s0,10);
+ const cap={'5k':45,'10k':55,half:70,marathon:90}[eo]||60;
+ const peak=Math.max(s0,Math.min(cap,s0*(eo=='consistent'?1.15:eo=='return'?2:1.5)));
+ const lc={'5k':14,'10k':18,half:24,marathon:32}[eo]||16;
+ const wd=[...c.days].sort((a,b)=>a-b);
+
+
+ const bg=new Date((c.begin||c.start)+'T12:00'),dflt=w=>w==0?c.days.filter(d=>add(st,d)>=bg):c.days;
+ let base=s0;const weeks=[];
+ for(let w=0;w<W;w++){
+  const tp=w>=B,rec=!tp&&w%4==3,last=w==W-1;let km,ease=false,adj='';
+  const b0=base;
+  if(!tp&&!rec&&w>0)base=Math.min(peak,base*1.08);
+  const pw=weeks[w-1];
+  if(pw&&pw.fewer){base=Math.min(base,b0);adj='Last week had fewer runs, so this week holds steady instead of building.'}
+  if(pw&&started.includes(w-1)){
+   const its=Object.keys(pw.items),dn=its.filter(d=>done[(w-1)+'-'+d]),ck=dn.reduce((a,d)=>a+pw.items[d].km,0);
+   const tot=its.reduce((a,d)=>a+pw.items[d].km,0)||1,got=act[w-1]!=null?act[w-1]:ck,ratio=got/tot;
+   const rs=dn.map(d=>rt[(w-1)+'-'+d]||'fine'),hd=rs.filter(x=>x=='hard').length,es=rs.filter(x=>x=='easy').length;
+   if(ratio<.5){base=b0*.85;ease=true;adj='Last week had few runs, so this week steps back a little.'}
+   else if(ratio<.85){base=Math.min(base,b0);adj='You did most of last week, so this week holds steady instead of building.'}
+   else if(rs.length&&hd/rs.length>=.5){base=b0*.9;ease=true;adj='Several runs felt hard, so this week is lighter with no hard sessions.'}
+   else if(rs.length&&es/rs.length>=.66){base=Math.min(peak,base*1.03);adj='Last week felt easy, so this week builds a touch more.'}
+   else if(!pw.fewer)adj='Last week went well, so steady progress continues.'}
+  km=tp?base*(last?.55:.75):rec?base*.8:base;
+  const dw=[...(wo[w]&&wo[w].length?wo[w]:dflt(w))].sort((a,b)=>a-b),nr=dw.length,fewer=nr<c.days.length,kmFull=km;
+  if(fewer)km*=.5+.5*nr/c.days.length;
+  const vd=vdAt(w),ep=vd?pace(vd,.7):6.5,tpc=vd?pace(vd,.88):5.5,ip=vd?pace(vd,.98):5.1;
+  const P=vd?{e:fp(pace(vd,.74))+'–'+fp(pace(vd,.65)),t:fp(tpc),i:fp(ip),v:vd}:null;
+  const ph=tp?'Taper':rec?'Recovery':w<B*.4?'Base':w<B*.8?'Build':'Peak';
+  const rdx=last&&race?(rd?(rd.getDay()+6)%7:(dw[dw.length-1]??6)):-1;
+  const sel=rdx>=0?dw.filter(d=>d<rdx):dw,n=sel.length,items={};
+  const ld=sel.filter(d=>d>4).pop()??sel[n-1];
+  if(rdx>=0){
+   items[rdx]={t:'race',title:goal?`Goal day: ${NAME[eo]} in ${c.tgt}`:'Event day: '+NAME[eo],desc:goal?`Aim for around ${fp(mins(c.tgt)/c.dist)}/km and enjoy the final kilometre.`:'Start easy, run by feel, enjoy the finish.',km:RACE[eo]};
+   sel.forEach((d,i)=>items[d]={t:'easy',title:'Easy shake-out',desc:'20–30 min easy'+(i==n-1?', plus 4 × 20 s strides':''),km:4});
+  }else if(eo=='return'){
+   const r=[1,2,3,4,5,8,10,15][Math.min(w,7)],k=w<6?2:1,reps=Math.max(1,Math.round((30+(w>3?5:0))/(r+k)));
+   sel.forEach(d=>items[d]={t:d==ld?'long':'easy',title:`${reps} × (${r} min run, ${k} min walk)`,desc:'Very easy, you can talk. Stop if something hurts.',km:+(reps*(r+k)/8).toFixed(1)});
+  }else if(n){
+   let qn=ease||['consistent','base'].includes(eo)?0:tp?1:rec?0:ph=='Base'?1:n>3?2:1;qn=Math.max(0,Math.min(qn,n-2));
+   const fr=m=>m==1?1:m==2?.5:m==3?.4:.3,nl=Math.min(kmFull*fr(c.days.length),lc),lk=Math.max(3,Math.round(Math.min(km*fr(n),lc,fewer?nl*1.35:lc)));
+   items[ld]={t:'long',title:`Long run ${lk} km`,desc:'Easy, steady effort'+(P?`, ${P.e}/km`:''),km:lk};
+   const rem=sel.filter(d=>d!=ld),hard=[ld],qd=[],md=d=>Math.min(...hard.map(x=>Math.abs(x-d)));
+   for(let i=0;i<qn;i++){const cd=rem.filter(d=>!hard.includes(d)).sort((a,b)=>md(b)-md(a));if(!cd.length)break;qd.push(cd[0]);hard.push(cd[0])}
+   const kinds=ph=='Build'?['tempo','int']:ph=='Peak'?['int','tempo']:['tempo'];
+   qd.forEach((d,i)=>{
+    if(kinds[i]=='tempo'){const m=tp?10:Math.min(30,10+2*w);items[d]={t:'tempo',title:`Tempo ${m} min`,desc:`2 km easy, ${m} min at ${P?P.t+'/km':'comfortably hard'}, 2 km easy`,km:+(4+m/tpc).toFixed(1)}}
+    else{const r=Math.min(8,3+(w>>1));items[d]={t:'int',title:`${r} × 3 min intervals`,desc:`2 km easy, ${r} × 3 min at ${P?P.i+'/km':'hard but controlled'} with 2 min jog, 2 km easy`,km:+(4+r*(3/ip+2/ep)).toFixed(1)}}});
+   const used=Object.values(items).reduce((s,x)=>s+x.km,0),ez=sel.filter(d=>!items[d]);
+   ez.forEach((d,i)=>{const k=Math.max(3,Math.min(Math.round((km-used)/ez.length),Math.round(lk*.8)));
+    items[d]={t:'easy',title:'Easy run',desc:`${k} km, conversational`+(P?`, ${P.e}/km`:'')+(i==0?', plus 6 × 20 s strides':''),km:k}});
+   if(goal&&rec&&ez.length){const td=c.dist<=10?+c.dist:5;
+    items[ez[0]]={t:'int',title:`Check-in: ${td} km at a strong, even effort`,desc:`15 min easy warm-up, then ${td} km at a strong effort you can keep steady. Log the time under Update my paces with a recent result so the plan fits you. Around ${ft(timeFor(vd,td))} is a fair guess, and any time is useful.`,km:td+3}}
+  }
+  weeks.push({ph,items,P,adj,fewer,date:add(st,7*w),km:Math.round(Object.values(items).reduce((s,x)=>s+x.km,0))});
+ }
+ const lw=weeks[W-1],rk=Object.keys(lw.items).find(d=>lw.items[d].t=='race');
+ return{weeks,note,fin:rk!=null?add(lw.date,+rk):add(lw.date,6),finRace:rk!=null,begin:bg};
+}
+
+const csv=t=>{const r=[];let row=[],f='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=ch}else if(ch=='"')q=true;else if(ch==','){row.push(f);f=''}else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;row.push(f);r.push(row);row=[];f=''}else f+=ch}if(f||row.length){row.push(f);r.push(row)}return r};
+function pCsv(t){const r=csv(t),h=r.shift()||[],iD=h.indexOf('Activity Date'),iT=h.indexOf('Activity Type'),iM=h.lastIndexOf('Moving Time'),ds=h.map((x,i)=>x=='Distance'?i:-1).filter(i=>i>=0),o=[];
+ for(const x of r){if(!/run/i.test(x[iT]||''))continue;const dt=new Date(String(x[iD]).replace(/,(\s*\d{1,2}:)/,' $1'));if(isNaN(dt))continue;
+  let km=Math.max(0,...ds.map(i=>parseFloat(String(x[i]).replace(',','.'))||0));if(km>300)km/=1000;o.push({d:iso(dt),km,min:(parseFloat(x[iM])||0)/60})}return o}
+const hav=(a,b)=>{const r=x=>x*Math.PI/180,h=Math.sin(r(b[0]-a[0])/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(r(b[1]-a[1])/2)**2;return 12742*Math.asin(Math.sqrt(h))};
+function pGpx(t){const d=new DOMParser().parseFromString(t,'text/xml'),pts=[...d.getElementsByTagName('trkpt')];let km=0,pr=null,t0=null,t1=null;
+ for(const p of pts){const q=[+p.getAttribute('lat'),+p.getAttribute('lon')];if(pr)km+=hav(pr,q);pr=q;const e=p.getElementsByTagName('time')[0];if(e){const z=new Date(e.textContent);t0=t0||z;t1=z}}
+ return t0&&t1?[{d:iso(t0),km,min:(t1-t0)/6e4}]:[]}
+function pTcx(t){const d=new DOMParser().parseFromString(t,'text/xml'),o=[];
+ for(const a of d.getElementsByTagName('Activity')){if((a.getAttribute('Sport')||'').toLowerCase()!='running')continue;let km=0,s=0;
+  for(const l of a.getElementsByTagName('Lap')){km+=+(l.getElementsByTagName('DistanceMeters')[0]?.textContent||0)/1000;s+=+(l.getElementsByTagName('TotalTimeSeconds')[0]?.textContent||0)}
+  const id=a.getElementsByTagName('Id')[0]?.textContent;if(id)o.push({d:iso(new Date(id)),km,min:s/60})}return o}
+
+function chips(){$('#dys').innerHTML=DAYS.map((d,i)=>`<button type="button" data-i="${i}" class="${sd.includes(i)?'on':''}">${d}</button>`).join('')}
+const fdy=d=>d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+const tdy=()=>{$('#today').textContent='Today: '+fdy(new Date())};
+const last=()=>started.length?Math.max(...started):-1;
+const stat=w=>{const x=plan.weeks[w],ks=Object.keys(x.items),dn=ks.filter(d=>done[w+'-'+d]);return{n:ks.length,dn:dn.length,rated:dn.filter(d=>rt[w+'-'+d]).length}};
+const esc=t=>String(t).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+function ics(ws){
+ const p=n=>String(n).padStart(2,'0'),f=(d,h,m)=>`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(h)}${p(m)}00`;
+ const [h,m]=(c.rtm||'07:00').split(':').map(Number),now=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',td=iso(new Date()),L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//My running plan//EN'];let n=0;
+ for(const [w,x] of ws)for(const d in x.items){const dt=add(x.date,+d);if(iso(dt)<td||done[w+'-'+d])continue;
+  const it=x.items[d],s=new Date(dt);s.setHours(h,m,0,0);const e=new Date(s.getTime()+Math.max(25,Math.round(it.km*7))*6e4);n++;
+  L.push('BEGIN:VEVENT',`UID:w${w}d${d}-${c.start}@runplan`,'DTSTAMP:'+now,'DTSTART:'+f(s,h,m),'DTEND:'+f(e,e.getHours(),e.getMinutes()),'SUMMARY:'+esc('Run: '+it.title),'DESCRIPTION:'+esc(it.desc+' ('+it.km+' km)'),'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:Run','END:VALARM','END:VEVENT')}
+ L.push('END:VCALENDAR');return n?L.join('\r\n'):''}
+async function send(ws,name){
+ const t=ics(ws);if(!t){msg='Nothing to add: no upcoming runs left.';render();return}
+ const f=new File([t],name,{type:'text/calendar'});
+ try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e.name=='AbortError')return}
+ const a=document.createElement('a');const url=URL.createObjectURL(f);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ msg='Calendar file downloaded. Open it to add the runs to Calendar.';render()}
+function begin(n){started.push(n);S('started',started);cur=n;pend=0;render()}
+function week(){
+ const x=plan.weeks[cur],P=x.P,L=last(),on=chosen&&!draft,live=on&&cur==L,past=on&&cur<L,nxt=on&&cur==L+1;
+ let h=`<div class="${past?'past':''}"><h2 data-view-key="week-heading">Week ${cur+1}: ${x.ph}, ${x.km} km</h2><div class="m">${fd(x.date)} to ${fd(add(x.date,6))}${act[cur]!=null?`. Logged runs: ${act[cur].toFixed(1)} km`:''}</div>`;
+ if(P)h+=`<div class="m">Paces this week: easy ${P.e}/km, tempo ${P.t}/km, intervals ${P.i}/km</div>`;
+ if(cur==0&&plan.begin>x.date)h+=`<div class="card">You start on ${fdy(plan.begin)}, so this week only has the remaining run days. Next week is a full week.</div>`;
+ if(x.adj&&(live||past||nxt))h+=`<div class="card">${x.adj}${nxt?' This preview updates as you log your runs.':''}</div>`;
+ if(nxt){const s=stat(cur-1),u=s.n-s.dn,v=s.dn-s.rated;
+  h+=pend==cur?`<div class="card">Week ${cur} has ${u} runs not marked done and ${v} done runs without a rating. Unmarked runs count as skipped, unrated runs as fine.<div class="row"><button type="button" class="btn sm" data-go="${cur}">Start week ${cur+1}</button><button type="button" class="btn sm alt" data-no="1">Go back</button></div></div>`
+  :`<button type="button" class="btn" data-start="${cur}">Start week ${cur+1}</button>`}
+ else if(on&&cur>L+1)h+=`<div class="m">Preview. This week updates as you finish earlier weeks.</div>`;
+ if(on&&cur>=L){const a0=(wo[cur]&&wo[cur].length)?wo[cur]:(cur==0?c.days.filter(d=>add(x.date,d)>=plan.begin):c.days);
+  h+=`<div class="card">Run days this week: ${a0.length}. ${Object.keys(done).some(k=>k.startsWith(cur+'-')&&done[k])?'This schedule is locked because you have completed a run. You can adjust future weeks.':'Changing days rebuilds this week.'}<div class="chips">${DAYS.map((nm,d)=>`<button type="button" ${(cur==0&&add(x.date,d)<plan.begin)||Object.keys(done).some(k=>k.startsWith(cur+'-')&&done[k])?'disabled':''} class="${a0.includes(d)?'on':''}" data-wd="${d}">${nm}</button>`).join('')}</div>${wo[cur]?'<button type="button" class="btn sm alt" data-wr="1">Back to my usual days</button>':''}</div>`}
+ for(let d=0;d<7;d++){const it=x.items[d],dt=add(x.date,d);
+  if(!it){h+=`<div class="rest" data-view-key="day-${d}">${fd(dt)}, rest day</div>`;continue}
+  const k=cur+'-'+d,dn=done[k],r=rt[k];let ctl='';
+  if(live)ctl=`<div class="ctl"><button type="button" class="${dn?'on':''}" data-d="${k}">${dn?'Done':'Mark as done'}</button>${dn?[['easy','Easy'],['fine','Fine'],['hard','Hard']].map(([v,l])=>`<button type="button" class="${r==v?'on':''}" data-r="${k}|${v}">${l}</button>`).join(''):''}</div>`;
+  else if(past)ctl=`<div class="m">${dn?'Done, felt '+(r||'fine'):'Not done'}</div>`;
+  h+=`<div data-view-key="day-${d}" class="wo ${it.t}${dn?' done':''}"><div class="m">${fd(dt)}, ${it.km} km</div><b>${it.title}</b><div>${it.desc}</div>${ctl}</div>`}
+ if(on)h+=`<div class="card">Export your runs to your calendar, with a reminder 30 minutes before.<div class="row"><button type="button" class="btn sm" data-x="week">This week</button><button type="button" class="btn sm" data-x="all">All upcoming weeks</button></div></div>`;
+ $('#wkv').innerHTML=h+'</div>';
+}
+// Replacing #out used to collapse the page and discard focus, open sections and edits.
+// Hold the document height until the rebuilt content and viewport have been restored.
+function render(){
+ const out=$('#out'), y=window.scrollY, x=window.scrollX;
+ const minHeight=document.body.style.minHeight;
+ const sections=[...out.querySelectorAll('details[id]')].map(e=>[e.id,e.open]);
+ const fields=[...out.querySelectorAll('input[id]:not([type="file"]),select[id]')].map(e=>[e.id,e.value]);
+ const focused=out.contains(document.activeElement)?document.activeElement:null;
+ const focusKey=focused?(focused.id?'#'+focused.id:[...focused.attributes].filter(a=>a.name.startsWith('data-')).map(a=>'['+a.name+'="'+CSS.escape(a.value)+'"]').join('')):'';
+ const anchor=[...out.querySelectorAll('[data-view-key]')].find(e=>{const r=e.getBoundingClientRect();return r.bottom>0&&r.top<window.innerHeight});
+ const anchorKey=anchor?.dataset.viewKey, top=anchor?.getBoundingClientRect().top;
+ document.body.style.minHeight=document.documentElement.scrollHeight+'px';
+ try {
+  renderContent();
+  for(const [id,open] of sections){const e=document.getElementById(id);if(e)e.open=open}
+  for(const [id,value] of fields){const e=document.getElementById(id);if(e)e.value=value}
+  if(focusKey){const e=out.querySelector(focusKey);if(e)e.focus({preventScroll:true})}
+  const next=anchorKey?out.querySelector('[data-view-key="'+CSS.escape(anchorKey)+'"]'):null;
+  const target=next?window.scrollY+next.getBoundingClientRect().top-top:y;
+  document.body.style.minHeight=minHeight;
+  window.scrollTo({left:x,top:target,behavior:'instant'});
+ } finally {document.body.style.minHeight=minHeight}
+}
+function renderContent(){
+ act={};runs.forEach(r=>{const w=weekOf(r.d);if(w>=0)act[w]=(act[w]||0)+r.km});
+ plan=build();const W=plan.weeks.length,cw=Math.max(0,Math.min(W-1,weekOf(iso(new Date())))),L=last(),on=chosen&&!draft;
+ if(cur==null||cur>=W)cur=on&&L>=0?L:0;
+ const sl=($('.wk')||{}).scrollLeft||0;let ban='';
+ const dc=`<div class="card">Starts ${fdy(plan.begin)}. ${plan.finRace?'Goal day':'Ends'} ${fdy(plan.fin)}. ${W} weeks in total.</div>`;
+ const rl=[...runs].sort((a,b)=>b.d.localeCompare(a.d)).slice(0,20).map(r=>{const dt=fdy(new Date(r.d+'T12:00'));
+  if(er==r.k)return `<div class="rrow"><div class="row"><label>Date<input type="date" id="ed" value="${r.d}"></label><label>Km<input id="ek" type="number" step="0.01" value="${r.km.toFixed(2)}"></label><label>Time<input id="et" value="${ft(r.min)}"></label></div><div class="ctl"><button type="button" class="on" data-rs="${r.k}">Save</button><button type="button" data-rc="1">Cancel</button></div></div>`;
+  if(dr==r.k)return `<div class="rrow">Delete the run of ${dt}?<div class="ctl"><button type="button" class="on" data-ry="${r.k}">Yes, delete</button><button type="button" data-rc="1">Keep it</button></div></div>`;
+  return `<div class="rrow"><b>${dt}</b><div class="m">${r.km.toFixed(2)} km, ${ft(r.min)}, ${fp(r.min/r.km)}/km${r.src=='manual'?', added by you':''}</div><div class="ctl"><button type="button" data-re="${r.k}">Edit</button><button type="button" data-rd="${r.k}">Delete</button></div></div>`}).join('')+(runs.length>20?`<div class="m">Showing the latest 20 of ${runs.length}.</div>`:'');
+ if(on&&L>=0&&L+1<W){const s=stat(L),ready=s.n&&s.dn==s.n&&s.rated==s.n;if(ready||cw>L)ban=`<div class="card">${ready?`All runs of week ${L+1} are logged and rated.`:'A new week has begun.'}<button type="button" class="btn sm" data-start="${L+1}">Start week ${L+2}</button></div>`}
+ $('#out').innerHTML=(draft?`<div class="card">You are previewing this plan. ${chosen?'Your current programme is saved.':'Choose it to start tracking your runs.'}<div class="row"><button type="button" class="btn sm" data-choose="1">Choose this programme</button>${chosen?'<button type="button" class="btn sm alt" data-back="1">Back to my programme</button>':''}</div></div>`:'')
+ +dc+ban+(plan.note?`<div class="card">${plan.note}</div>`:'')
+ +(plan.weeks[0].P?'':`<div class="card">No result entered, so sessions use effort. Easy: you can talk in sentences. Tempo: comfortably hard. Intervals: hard but controlled.</div>`)
+ +(on?`<details id="runs"${ro?' open':''}><summary>My runs (${runs.length})</summary>
+ <div class="row"><label>Date<input type="date" id="nd" value="${iso(new Date())}"></label><label>Km<input id="nk" type="number" step="0.01" inputmode="decimal"></label><label>Time<input id="nt" placeholder="32:10"></label></div>
+ <button id="nadd" class="btn sm" type="button">Add this run</button>
+ <label>Or import Strava activities.csv, GPX or TCX files<input type="file" id="imp" multiple accept=".csv,.gpx,.tcx"></label>${rl}</details>
+ <details id="pace-result"><summary>Update my paces with a recent result</summary>
+ <div class="row"><label>Distance<select id="rdist"><option value="5">5 km</option><option value="10">10 km</option><option value="21.1">Half</option><option value="42.2">Marathon</option></select></label><label>Time<input id="rtime" placeholder="38:30"></label></div>
+ <button id="rsave" class="btn" type="button">Save result</button></details>`:'')+(msg?`<div class="m" role="status">${msg}</div>`:'')
+ +`<div class="chips wk" data-view-key="week-picker" aria-label="Plan weeks">${plan.weeks.map((x,i)=>`<button type="button" data-w="${i}" aria-pressed="${i==cur}" class="${i==cur?'on':''}${on&&i<L?' past':''}${on&&i==L?' now':''}">W${i+1}</button>`).join('')}</div><div id="wkv"></div>`;
+ const wk=$('.wk');if(wk)wk.scrollLeft=sl;
+ tdy();$('#prog').innerHTML=on?`Week ${L+1} of ${W}<div class="bar"><i style="width:${Math.round((L+1)/W*100)}%"></i></div>`:'Previewing a plan';
+ week();
+}
+$('#dys').onclick=e=>{let i=e.target.dataset.i;if(i==null)return;i=+i;sd=sd.includes(i)?sd.filter(x=>x!=i):[...sd,i];chips()};
+$('#go').onclick=()=>{
+const bd=$('#sdt').value||iso(nextMon()),bdd=new Date(bd+'T12:00');
+ const n={obj:$('#obj').value,rd:$('#rd').value,dist:$('#dist').value,time:$('#time').value,tgt:$('#tgt').value,wks:$('#wks').value,km:+$('#km').value||0,days:[...sd],begin:bd,start:iso(add(bdd,-((bdd.getDay()+6)%7))),rtm:$('#rtm').value||'07:00'};
+ const vd=mins(n.time)>0?vdot(n.dist*1000,mins(n.time)):0;let err='';
+ if(bd<iso(new Date()))err='Start today or later.';
+ else if(n.days.length<2)err='Pick at least 2 run days.';
+ else if(n.obj=='goal'&&(!vd||vd<15||vd>85))err='Goal mode needs your current time for the distance, for example 40:00.';
+ else if(n.obj=='goal'&&!(mins(n.tgt)>0&&vdot(n.dist*1000,mins(n.tgt))>vd))err='Goal time must be faster than your current time.';
+ else if(!validDate(bd))err='Choose a valid start date.';
+ else if(n.wks&&(!Number.isInteger(+n.wks)||+n.wks<4||+n.wks>52))err='Choose a whole number of weeks from 4 to 52.';
+ else if(!Number.isFinite(n.km)||n.km<0||n.km>150)err='Enter weekly distance from 0 to 150 km.';
+ else if(n.km===0&&n.obj!=='return')err='Choose Return to running if you are starting from zero weekly kilometres.';
+ else if(n.time&&(!Number.isFinite(vd)||vd<15||vd>85))err='Enter a valid current result, such as 40:00 or 1:55:00.';
+ else if(n.obj in RACE&&n.rd&&(!validDate(n.rd)||n.rd<bd||dayNumber(n.rd)-dayNumber(n.start)>=364))err='Choose an event date on or after your start, within 52 weeks.';
+ $('#setup-msg').textContent=err;
+ if(err)return;
+ draft=true;c=n;res=vd?[{w:0,v:vd}]:[];done={};rt={};started=[];wo={};er=null;dr=null;cur=0;pend=0;msg='';render();$('#setup').open=false;
+};
+$('#out').onclick=e=>{
+ const q=t=>e.target.closest(t),b=q('[data-w]'),d=q('[data-d]'),r=q('[data-r]'),st=q('[data-start]'),go=q('[data-go]'),x=q('[data-x]');
+ if(b){cur=+b.dataset.w;pend=0;render()}
+ else if(q('[data-wd]')){const d0=+q('[data-wd]').dataset.wd,x0=plan.weeks[cur],cb=(wo[cur]&&wo[cur].length)?wo[cur]:(cur==0?c.days.filter(i=>add(x0.date,i)>=plan.begin):c.days),nb=cb.includes(d0)?cb.filter(i=>i!=d0):[...cb,d0];
+  if(Object.keys(done).some(k=>k.startsWith(cur+'-')&&done[k]))return;
+  if(nb.length>=1){wo[cur]=nb.sort((a,b)=>a-b);S('wo',wo);render()}}
+ else if(q('[data-wr]')){if(Object.keys(done).some(k=>k.startsWith(cur+'-')&&done[k])){msg='Keep completed run days when changing your schedule.';render();return}delete wo[cur];S('wo',wo);render()}
+ else if(q('[data-re]')){er=q('[data-re]').dataset.re;dr=null;render()}
+ else if(q('[data-rd]')){dr=q('[data-rd]').dataset.rd;er=null;render()}
+ else if(q('[data-rc]')){er=null;dr=null;render()}
+ else if(q('[data-ry]')){const k=q('[data-ry]').dataset.ry;runs=runs.filter(z=>z.k!=k);S('runs',runs);dr=null;msg='Run deleted.';render()}
+ else if(q('[data-rs]')){const k=q('[data-rs]').dataset.rs,rr=runs.find(z=>z.k==k),dd=$('#ed').value,kk=parseFloat($('#ek').value),mm=mins($('#et').value);
+  if(rr&&validDate(dd)&&dd<=iso(new Date())&&Number.isFinite(kk)&&kk>0&&mm>0){rr.d=dd;rr.km=kk;rr.min=mm;S('runs',runs);er=null;msg='Run updated.';render()}else{msg='Enter a valid past or present date, positive distance and time.';render()}}
+ else if(e.target.id=='nadd'){const dd=$('#nd').value,kk=parseFloat($('#nk').value),mm=mins($('#nt').value);
+  if(validDate(dd)&&dd<=iso(new Date())&&Number.isFinite(kk)&&kk>0&&mm>0){runs.push({d:dd,km:kk,min:mm,k:'m'+Date.now(),src:'manual'});S('runs',runs);ro=true;$('#nk').value='';$('#nt').value='';msg='Run added. It counts toward its week. Mark the matching planned session as done to track completion.'}else msg='Add a date no later than today, a positive distance and a time such as 32:10.';render()}
+ else if(d){const k=d.dataset.d;done[k]=!done[k];if(!done[k])delete rt[k];S('done',done);S('rt',rt);render()}
+ else if(r){const[k,v]=r.dataset.r.split('|');rt[k]=v;S('rt',rt);render()}
+ else if(st){const n=+st.dataset.start,s=stat(n-1);if(s.dn<s.n||s.rated<s.dn){cur=n;pend=n;render()}else begin(n)}
+ else if(go)begin(+go.dataset.go);
+ else if(q('[data-no]')){pend=0;render()}
+ else if(q('[data-choose]')){draft=false;chosen=true;started=[0];S('cfg',c);S('res',res);S('done',done);S('rt',rt);S('started',started);S('wo',wo);S('chosen',true);cur=0;msg='';render();$('#setup').open=false}
+ else if(q('[data-back]')){draft=false;load();sd=[...c.days];chips();cur=null;pend=0;msg='';render()}
+ else if(x){const all=x.dataset.x=='all';send(plan.weeks.map((w,i)=>[i,w]).filter(([i])=>all?true:i==cur),'running-plan.ics')}
+ else if(e.target.id=='rsave'){const t=mins($('#rtime').value),dd=$('#rdist').value;
+  if(t>0){const v=vdot(dd*1000,t);if(v>15&&v<85){res.push({w:Math.max(0,weekOf(iso(new Date()))),v});S('res',res);msg='Result saved. Paces and the estimated timeline are updated.';$('#rtime').value='';render();return}}msg='Enter a valid result, such as 38:30 or 1:55:00.';render()}
+};
+$('#out').onchange=async e=>{
+ if(e.target.id!='imp')return;let n=0,failed=0;ro=true;
+ for(const f of e.target.files){try{const t=await f.text(),x=f.name.toLowerCase(),a=x.endsWith('.csv')?pCsv(t):x.endsWith('.tcx')?pTcx(t):pGpx(t);
+  for(const r of a){if(!validDate(r.d)||r.d>iso(new Date())||!(Number.isFinite(r.km)&&r.km>0&&Number.isFinite(r.min)&&r.min>0))continue;const k=r.d+'|'+r.km.toFixed(1);if(runs.some(q=>q.k==k))continue;runs.push({...r,k});n++}}catch(e){failed++}}
+ S('runs',runs);msg=n?`Imported ${n} runs. Next weeks adapt to what you actually ran.`:'No new runs found. Check the file format and activity dates.';if(failed)msg+=' '+failed+' file(s) could not be read.';render();
+};
+$('#obj').value=c.obj;$('#rd').value=c.rd;$('#dist').value=c.dist;$('#time').value=c.time;$('#tgt').value=c.tgt;$('#wks').value=c.wks;$('#km').value=c.km;$('#rtm').value=c.rtm||'07:00';
+$('#sdt').min=iso(new Date());$('#sdt').value=(c.begin&&c.begin>=iso(new Date()))?c.begin:iso(nextMon());
+$('#sq').onclick=e=>{const v=e.target.dataset.sd;if(v==null)return;const d=v=='m'?nextMon():add(new Date(new Date().setHours(12,0,0,0)),+v);$('#sdt').value=iso(d)};
+$('#out').addEventListener('toggle',e=>{if(e.target.id=='runs')ro=e.target.open},true);
+tdy();chips();if(chosen&&c.start&&c.days.length>=2){render();$('#setup').open=false}
+</script></body></html>
